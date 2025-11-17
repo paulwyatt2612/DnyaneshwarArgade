@@ -1,0 +1,31 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # Runs daily at 2 AM UTC
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/paulwyatt2612/DnyaneshwarArgade
+      - name: Fetch upstream changes
+        run: git fetch upstream
+
+      - name: Merge upstream/main into fork
+        run: git checkout main && git merge upstream/main --allow-unrelated-histories
+
+      - name: Push changes
+        run: git push origin main
